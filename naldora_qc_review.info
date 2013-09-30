@@ -1,0 +1,7 @@
+name = Naldora QC Review
+dependencies[] = islandora_bookmark
+description = QC Review Changes for USDA.
+package = Islandora
+version = 7.x-dev
+core = 7.x
+files[] = includes/bookmark_class.inc

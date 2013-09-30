@@ -1,0 +1,9 @@
+<?php
+
+define('NALDORA_QC_REVIEW_LIST_TYPE', 'naldora_qc_review');
+
+function naldora_qc_review_islandora_bookmark_database_types() {
+  return array(
+    NALDORA_QC_REVIEW_LIST_TYPE => 'NaldoraQCReviewList',
+  );
+}
