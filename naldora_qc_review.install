@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function naldora_qc_review_enable() {
+  $qc_role = user_role_load_by_name(NALDORA_QC_REVIEW_ROLE);
+  if (!$qc_role) {
+    $qc_role = new stdClass();
+    $qc_role->name = NALDORA_QC_REVIEW_ROLE;
+    user_role_save($qc_role);
+    $qc_role = user_role_load($qc_role->rid);
+  }
+  user_role_grant_permissions($qc_role->rid, array(
+    ISLANDORA_METADATA_EDIT,
+    'use islandora_bookmark',
+  ));
+}

@@ -9,7 +9,7 @@
 /**
  * Extention of IslandoraSolrResults to create an alternative display type.
  */
-class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
+class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
   /**
    * Get the header row to use in the tableselect.
    *
@@ -18,7 +18,10 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
    */
   protected function getTableHeader() {
     return array(
-      'markup' => t('Label'),
+      'title' => t('Title'),
+      'host_title' => t('Host Title'),
+      'volume_issue' => t('Volume/Issue'),
+      'date_issued' => t('Date Issued'),
     );
   }
 
@@ -35,23 +38,39 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
   protected function getTableRow($object_result) {
     $doc = $object_result['solr_doc'];
 
-    $markup = '';
-    if (isset($doc['object_label'])) {
-      $markup = $doc['object_label'];
-    }
-    else {
-      $markup = $doc['PID'];
-    }
-
-    $object_url_info = array(
-      'path' => $object_result['object_url'],
-      'params' => $object_result['object_url_params'],
-      'markup' => $markup,
+    $map = array(
+      'title' => array(
+        'field' => 'mods_titleInfo_title_ms',
+        'link' => TRUE,
+      ),
+      'host_title' => array(
+        'field' => 'mods_relatedItem_host_titleInfo_title_ms',
+        'link' => FALSE,
+      ),
+      'volume_issue' => array(
+        'field' => 'mods_relatedItem_volume_issue_ms',
+        'link' => FALSE,
+      ),
+      'date_issued' => array(
+        'field' => 'mods_originInfo_dateIssued_mdt',
+        'link' => FALSE,
+      ),
     );
 
-    return array(
-      'markup' => islandora_bookmark_generate_markup($doc['PID'], $object_url_info),
-    );
+    $map_function = function ($field_info) use ($doc) {
+      extract($field_info);
+
+      $to_implode = isset($doc[$field]) ?
+        (array) $doc[$field] :
+        array();
+      $text = implode(', ', $to_implode);
+
+      return $link ?
+        l($text, "islandora/object/{$doc['PID']}") :
+        $text;
+    };
+
+    return array_map($map_function, $map);
   }
 
   /**
@@ -71,15 +90,17 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
   protected function getActions(&$form_state) {
     $groups = array();
 
-    // TODO: Get list of users with whatever role...
-    $reviewers = array();
+    // Get list of users with our role.
+    module_load_include('inc', 'naldora_qc_review', 'includes/utilities');
+    $reviewers = naldora_qc_review_get_user_options(naldora_qc_review_get_rid(NALDORA_QC_REVIEW_ROLE));
+
     $groups['naldora_qc_review'] = array(
       '#type' => 'fieldset',
       '#title' => t('Quality Control Assignment'),
       'reviewer' => array(
         '#type' => 'select',
         '#title' => t('Reviewer'),
-        '#options' => array('default' => t('-- Select Reviewer --') + $reviewers,
+        '#options' => array('default' => t('-- Select Reviewer --')) + $reviewers,
       ),
       'assign_selected' => array(
         '#type' => 'submit',
@@ -115,6 +136,7 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
   protected function hasReviewerSelected($form, $form_state) {
     $el = $form_state['complete form']['naldora_qc_review']['reviewer'];
     $key = drupal_array_get_nested_value($form_state['values'], $el['#parents']);
+    dsm($form_state, 'state');
 
     if ($key == 'default') {
       form_set_error(implode('][', $el['#parents']), t('You must select a reviewer to whom to assign the set.'));
@@ -170,10 +192,12 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
   protected function save($pids_to_add, $form_state) {
     $reviewer_el = $form_state['complete form']['naldora_qc_review']['reviewer'];
     $reviewer = drupal_array_get_nested_value($form_state['values'], $reviewer_el['#parents']);
-    $reviwer_object = user_load($reviewer);
+    $reviewer_object = user_load($reviewer);
 
-    $list_name_el = $form_state['complete form']['naldora_qc_review']['list_name'];
-    $list_name = drupal_array_get_nested_value($form_state['values'], $list_name_el['#parents']);
+    $list_name = format_string('QC set created @date, and assigned to @name.', array(
+      '@date' => gmdate('Y-m-d\TH:i:s\Z'),
+      '@name' => $reviewer_object->name,
+    ));
 
     if (count($pids_to_add) > 0) {
       // Create $bookmark_object, to which to add our PIDs.
@@ -197,9 +221,8 @@ class NaldoraQCSolrResults extends IslandoraSolrResultsBookmark {
         return;
       }
 
-      // Assign the $bookmark_object to the selected reviewer.
-      module_load_include('inc', 'naldora_qc_review', 'includes/utilities');
-      naldora_qc_review_set_reviewer($bookmark_object, $reviewer_object);
+      // Associate the reviewer with the bookmark object.
+      $bookmark_object->addUser($reviewer_object->uid);
     }
   }
 }

@@ -1,9 +1,66 @@
 <?php
 
 define('NALDORA_QC_REVIEW_LIST_TYPE', 'naldora_qc_review');
+define('NALDORA_QC_REVIEW_ROLE', 'Naldora QC Reviewer');
 
 function naldora_qc_review_islandora_bookmark_database_types() {
   return array(
     NALDORA_QC_REVIEW_LIST_TYPE => 'NaldoraQCReviewList',
   );
+}
+
+/**
+ * Implements hook_islandora_solr_primary_display().
+ */
+function naldora_qc_review_islandora_solr_primary_display() {
+  return array(
+    NALDORA_QC_REVIEW_LIST_TYPE => array(
+      'name' => t('QC Review'),
+      'class' => 'NaldoraQCSolrReviewResults',
+      'function' => 'displayResults',
+      'description' => t('Naldora QC assignment interface.'),
+    ),
+  );
+}
+
+function naldora_qc_review_islandora_solr_query($query_processor) {
+  if ($query_processor->display == NALDORA_QC_REVIEW_LIST_TYPE) {
+    $query_processor->solrParams['fq'][] = 'RELS_EXT_hasModel_uri_ms:"info:fedora/nal-model:Article"';
+    $query_processor->solrParams['fq'][] = 'RELS_EXT_status_literal_ms:"qc"';
+    $query_processor->solrParams['fq'][] = '-RELS_EXT_naldoraQCSet_uri_ms:[* TO *]';
+  }
+}
+
+function naldora_qc_review_block_info() {
+  $blocks = array();
+
+  $blocks['naldora_qc_review_object_block'] = array(
+    'info' => t('QC Review'),
+    'cache' => DRUPAL_NO_CACHE,
+    'properties' => array(
+      'administrative' => TRUE,
+    ),
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => implode("\n", array(
+      'islandora/object/*',
+    )),
+  );
+
+  return $blocks;
+}
+
+function naldora_qc_review_block_view($delta = '') {
+  $block = array();
+  if ($delta == 'naldora_qc_review_object_block') {
+    module_load_include('inc', 'naldora_qc_review', 'includes/block.form');
+    $object = menu_get_object('islandora_object', 2);
+    if ($object) {
+      $form = drupal_get_form('naldora_qc_review_form', $object->id);
+      if (isset($form['reviewer_approval']) || isset($form['manager_approval'])) {
+        $block['content'] = $form;
+        $block['subject'] = t('QC Approval');
+      }
+    }
+  }
+  return $block;
 }

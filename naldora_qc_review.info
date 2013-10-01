@@ -5,3 +5,4 @@ package = Islandora
 version = 7.x-dev
 core = 7.x
 files[] = includes/bookmark_class.inc
+files[] = includes/solr_results.inc
