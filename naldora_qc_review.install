@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Installation hooks.
+ */
+
+/**
  * Implements hook_enable().
  */
 function naldora_qc_review_enable() {

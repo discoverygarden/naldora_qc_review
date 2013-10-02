@@ -140,7 +140,6 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
   protected function hasReviewerSelected($form, $form_state) {
     $el = $form_state['complete form']['naldora_qc_review']['reviewer'];
     $key = drupal_array_get_nested_value($form_state['values'], $el['#parents']);
-    dsm($form_state, 'state');
 
     if ($key == 'default') {
       form_set_error(implode('][', $el['#parents']), t('You must select a reviewer to whom to assign the set.'));
@@ -188,7 +187,7 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
   /**
    * Actually handle saving PIDs to a list.
    *
-   * @param array $pids
+   * @param array $pids_to_add
    *   An array of PIDs to save to the given list.
    * @param array $form_state
    *   The array of form state.

@@ -37,12 +37,13 @@ function naldora_qc_review_form($form, &$form_state, $object_id) {
         $form['manager_approval'] = array(
           '#type' => 'item',
           '#title' => t('Manager approval'),
-          '#markup' => $manager_approval ?
+          '#markup' => ($manager_approval ?
             t('This item received managerial approval from @name on @date.', array(
               '@name' => $manager_approval['name'],
               '@date' => $manager_approval['date'],
             )) :
-            t('This item has not yet been approved by a manager.'),
+            t('This item has not yet been approved by a manager.')
+          ),
         );
       }
       else {

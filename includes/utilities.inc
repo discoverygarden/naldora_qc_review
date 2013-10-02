@@ -102,7 +102,7 @@ function naldora_qc_review_manager_approve($object) {
         'naldoraQCManagerApproved',
       ),
       'http://purl.org/ontology/bibo/' => array(
-        'status'
+        'status',
       ),
     );
     foreach ($pred_info as $uri => $preds) {

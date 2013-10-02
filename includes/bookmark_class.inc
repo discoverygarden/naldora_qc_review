@@ -1,6 +1,17 @@
 <?php
 
+/**
+ * @file
+ * Bookmark class type.
+ */
+
 class NaldoraQCReviewList extends BookmarkDatabase {
+  /**
+   * Get the URL to this list.
+   *
+   * @return string
+   *   An absolute URL to this bookmark list, without langague prefixing.
+   */
   protected function getListURL() {
     return url("islandora-bookmark/listid/{$this->bookmarkId}", array(
       'language' => NULL,
@@ -8,6 +19,15 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     ));
   }
 
+  /**
+   * Inherits...
+   *
+   * Additionally, only allow an object to be a member of a single QC set, and
+   * and set a relationship on the object representing which list it is a
+   * member of.
+   *
+   * DSMs if the given PID is already a member of a QC list.
+   */
   public function addPid($pid) {
     // Set the state on the given object.
     $object = islandora_object_load($pid);
@@ -30,6 +50,11 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     }
   }
 
+  /**
+   * Inherits...
+   *
+   * Additionally, removes our relationship from the given object.
+   */
   public function removePid($pid) {
     $object = islandora_object_load($pid);
     if ($object) {
@@ -38,18 +63,9 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     return parent::removePid($pid);
   }
 
-  public function addUser($user_id) {
-    // Set user as the reviewer.
-    // TODO: Notify user?
-    return parent::addUser($user_id);
-  }
-
-  public function removeUser($user_id) {
-    // TODO: Remove user as reviewer... Review complete on this list?
-    // TODO: Iterate over every PID, setting state to completed?...
-    return parent::removeUser($user_id);
-  }
-
+  /**
+   * Inherits.
+   */
   protected function getTableHeader() {
     return array(
       'title' => t('Title'),
@@ -58,6 +74,9 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     );
   }
 
+  /**
+   * Inherits.
+   */
   protected function getTableRow($pid) {
     $object = islandora_object_load($pid);
     $reviewer_approved = naldora_qc_review_is_reviewer_approved($object);
@@ -91,11 +110,17 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     return $to_return;
   }
 
+  /**
+   * Inherits.
+   */
   public function formGet($form, &$form_state) {
     form_load_include($form_state, 'inc', 'naldora_qc_review', 'includes/utilities');
     return parent::formGet($form, $form_state);
   }
 
+  /**
+   * Inherits.
+   */
   protected function formAddActions(&$form_section, &$form_state) {
     global $user;
     if (in_array($user->uid, $this->getUsers())) {
@@ -148,38 +173,73 @@ class NaldoraQCReviewList extends BookmarkDatabase {
     }
   }
 
+  /**
+   * Inherits.
+   */
   protected function formAddSecondaryActions(&$form, &$form_state) {
     // No-op.
   }
 
+  /**
+   * Helper method, to actually set the given PIDs approved.
+   */
   protected function formReviewerApprove($pids, &$form_state) {
     $this->formApprove($pids, 'naldora_qc_review_reviewer_approve', $form_state);
   }
 
+  /**
+   * One of our '#action_submit' callbacks.
+   */
   protected function formReviewerApproveSelected(&$form, &$form_state) {
     $pids = $this->formGetSelected($form_state);
     $this->formReviewerApprove($pids, $form_state);
   }
 
+  /**
+   * One of our '#action_submit' callbacks.
+   */
   protected function formReviewerApproveAll(&$form, &$form_state) {
     $pids = $this->formGetAll($form_state);
     $this->formReviewerApprove($pids, $form_state);
   }
 
+  /**
+   * Helper method, to actually set the given PIDs approved.
+   */
   protected function formManagerApprove($pids, &$form_state) {
     $this->formApprove($pids, 'naldora_qc_review_manager_approve', $form_state);
   }
 
+  /**
+   * One of our '#action_submit' callbacks.
+   */
   protected function formManagerApproveSelected(&$form, &$form_state) {
     $pids = $this->formGetSelected($form_state);
     $this->formManagerApprove($pids, $form_state);
   }
 
+  /**
+   * One of our '#action_submit' callbacks.
+   */
   protected function formManagerApproveAll(&$form, &$form_state) {
     $pids = $this->formGetAll($form_state);
     $this->formManagerApprove($pids, $form_state);
   }
 
+  /**
+   * Helper's helper... Actually run the function which set approval.
+   *
+   * Because we return TRUE/FALSE if we are able to set approval from
+   * naldora_qc_review_reviewer_approve() and
+   * naldora_qc_review_manager_approve(), we can handle them in much the same
+   * way, and report in a consistent manner.
+   *
+   * @param array $pids
+   *   An array of string, representing object PIDs.
+   * @param callable $function
+   *   A callable we can use in array_filter(), which evalutes to true when the
+   *   PID it is provided is successfully processed.
+   */
   protected function formApprove($pids, $function, &$form_state) {
     $objects = array_map('islandora_object_load', $pids);
     $approved = array_filter($objects, $function);

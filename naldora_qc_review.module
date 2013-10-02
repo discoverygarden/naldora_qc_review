@@ -1,9 +1,17 @@
 <?php
 
+/**
+ * @file
+ * Module hook implementations.
+ */
+
 define('NALDORA_QC_REVIEW_LIST_TYPE', 'naldora_qc_review');
 define('NALDORA_QC_REVIEW_REVIEWER_ROLE', 'Naldora QC Reviewer');
 define('NALDORA_QC_REVIEW_MANAGER_ROLE', 'Naldora QC Manager');
 
+/**
+ * Implements hook_islandora_bookmark_database_types().
+ */
 function naldora_qc_review_islandora_bookmark_database_types() {
   return array(
     NALDORA_QC_REVIEW_LIST_TYPE => 'NaldoraQCReviewList',
@@ -24,6 +32,9 @@ function naldora_qc_review_islandora_solr_primary_display() {
   );
 }
 
+/**
+ * Implements hook_islandora_solr_query().
+ */
 function naldora_qc_review_islandora_solr_query($query_processor) {
   if ($query_processor->display == NALDORA_QC_REVIEW_LIST_TYPE) {
     $query_processor->solrParams['fq'][] = 'RELS_EXT_hasModel_uri_ms:"info:fedora/nal-model:Article"';
@@ -32,6 +43,9 @@ function naldora_qc_review_islandora_solr_query($query_processor) {
   }
 }
 
+/**
+ * Implements hook_block_info().
+ */
 function naldora_qc_review_block_info() {
   $blocks = array();
 
@@ -50,6 +64,9 @@ function naldora_qc_review_block_info() {
   return $blocks;
 }
 
+/**
+ * Implements hook_block_view().
+ */
 function naldora_qc_review_block_view($delta = '') {
   $block = array();
   if ($delta == 'naldora_qc_review_object_block') {
