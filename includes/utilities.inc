@@ -60,7 +60,7 @@ function naldora_qc_review_get_user_options($role_id) {
  */
 function naldora_qc_review_reviewer_approve($object) {
   // Mark reviewer's approval.
-  if (!naldora_qc_review_is_reviewer_approved($object)) {
+  if (naldora_qc_review_is_assigned_reviewer($object->id) && !naldora_qc_review_is_reviewer_approved($object)) {
     $pred_info = array(
       ISLANDORA_RELS_EXT_URI => array(
         'naldoraQCReviewer',
@@ -73,6 +73,7 @@ function naldora_qc_review_reviewer_approve($object) {
       }
     }
 
+    global $user;
     $object->relationships->add(ISLANDORA_RELS_EXT_URI, 'naldoraQCReviewer', $user->name, RELS_TYPE_PLAIN_LITERAL);
     $object->relationships->add(ISLANDORA_RELS_EXT_URI, 'naldoraQCReviewerApproved', gmdate('Y-m-d\TH:i:s\Z'), RELS_TYPE_DATETIME);
     return TRUE;
@@ -89,12 +90,12 @@ function naldora_qc_review_reviewer_approve($object) {
  *   The object receiving approval.
  *
  * @return bool
- *   TRUE if the object was not already approved and we set the relationships;
- *   otherwise, FALSE.
+ *   TRUE if the object was approved by the reviewer an not the manager and we
+ *   set the relationships; otherwise, FALSE.
  */
 function naldora_qc_review_manager_approve($object) {
   // Mark manager's approval.
-  if (!naldora_qc_review_is_manager_approved($object)) {
+  if (naldora_qc_review_is_reviewer_approved($object) && !naldora_qc_review_is_manager_approved($object)) {
     $pred_info = array(
       ISLANDORA_RELS_EXT_URI => array(
         'naldoraQCManager',
@@ -110,6 +111,7 @@ function naldora_qc_review_manager_approve($object) {
       }
     }
 
+    global $user;
     $object->relationships->add(ISLANDORA_RELS_EXT_URI, 'naldoraQCManager', $user->name, RELS_TYPE_PLAIN_LITERAL);
     $object->relationships->add(ISLANDORA_RELS_EXT_URI, 'naldoraQCManagerApproved', gmdate('Y-m-d\TH:i:s\Z'), RELS_TYPE_DATETIME);
     $object->relationships->add('http://purl.org/ontology/bibo/', 'status', 'waiting', RELS_TYPE_PLAIN_LITERAL);

@@ -4,14 +4,26 @@
  * Implements hook_enable().
  */
 function naldora_qc_review_enable() {
-  $qc_role = user_role_load_by_name(NALDORA_QC_REVIEW_ROLE);
-  if (!$qc_role) {
-    $qc_role = new stdClass();
-    $qc_role->name = NALDORA_QC_REVIEW_ROLE;
-    user_role_save($qc_role);
-    $qc_role = user_role_load($qc_role->rid);
+  $reviewer_role = user_role_load_by_name(NALDORA_QC_REVIEW_REVIEWER_ROLE);
+  if (!$reviewer_role) {
+    $reviewer_role = new stdClass();
+    $reviewer_role->name = NALDORA_QC_REVIEW_REVIEWER_ROLE;
+    user_role_save($reviewer_role);
+    $reviewer_role = user_role_load($reviewer_role->rid);
   }
-  user_role_grant_permissions($qc_role->rid, array(
+  user_role_grant_permissions($reviewer_role->rid, array(
+    ISLANDORA_METADATA_EDIT,
+    'use islandora_bookmark',
+  ));
+
+  $manager_role = user_role_load_by_name(NALDORA_QC_REVIEW_MANAGER_ROLE);
+  if (!$manager_role) {
+    $manager_role = new stdClass();
+    $manager_role->name = NALDORA_QC_REVIEW_MANAGER_ROLE;
+    user_role_save($manager_role);
+    $manager_role = user_role_load($manager_role->rid);
+  }
+  user_role_grant_permissions($manager_role->rid, array(
     ISLANDORA_METADATA_EDIT,
     'use islandora_bookmark',
   ));

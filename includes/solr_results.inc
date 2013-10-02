@@ -88,42 +88,46 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
    *   (or one of its ancestors).
    */
   protected function getActions(&$form_state) {
+    global $user;
+
     $groups = array();
 
-    // Get list of users with our role.
-    module_load_include('inc', 'naldora_qc_review', 'includes/utilities');
-    $reviewers = naldora_qc_review_get_user_options(naldora_qc_review_get_rid(NALDORA_QC_REVIEW_ROLE));
+    if (in_array(NALDORA_QC_REVIEW_MANAGER_ROLE, $user->roles)) {
+      // Get list of users with our role.
+      module_load_include('inc', 'naldora_qc_review', 'includes/utilities');
+      $reviewers = naldora_qc_review_get_user_options(naldora_qc_review_get_rid(NALDORA_QC_REVIEW_REVIEWER_ROLE));
 
-    $groups['naldora_qc_review'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Quality Control Assignment'),
-      'reviewer' => array(
-        '#type' => 'select',
-        '#title' => t('Reviewer'),
-        '#options' => array('default' => t('-- Select Reviewer --')) + $reviewers,
-      ),
-      'assign_selected' => array(
-        '#type' => 'submit',
-        '#value' => t('Assign Selected'),
-        '#action_validate' => array(
-          'hasObjectsSelected',
-          'hasReviewerSelected',
+      $groups['naldora_qc_review'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Quality Control Assignment'),
+        'reviewer' => array(
+          '#type' => 'select',
+          '#title' => t('Reviewer'),
+          '#options' => array('default' => t('-- Select Reviewer --')) + $reviewers,
         ),
-        '#action_submit' => array(
-          'saveSelected',
+        'assign_selected' => array(
+          '#type' => 'submit',
+          '#value' => t('Assign Selected'),
+          '#action_validate' => array(
+            'hasObjectsSelected',
+            'hasReviewerSelected',
+          ),
+          '#action_submit' => array(
+            'saveSelected',
+          ),
         ),
-      ),
-      'assign_all' => array(
-        '#type' => 'submit',
-        '#value' => t('Assign All'),
-        '#action_validate' => array(
-          'hasReviewerSelected',
+        'assign_all' => array(
+          '#type' => 'submit',
+          '#value' => t('Assign All'),
+          '#action_validate' => array(
+            'hasReviewerSelected',
+          ),
+          '#action_submit' => array(
+            'saveAll',
+          ),
         ),
-        '#action_submit' => array(
-          'saveAll',
-        ),
-      ),
-    );
+      );
+    }
 
     return $groups;
   }

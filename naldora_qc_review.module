@@ -1,7 +1,8 @@
 <?php
 
 define('NALDORA_QC_REVIEW_LIST_TYPE', 'naldora_qc_review');
-define('NALDORA_QC_REVIEW_ROLE', 'Naldora QC Reviewer');
+define('NALDORA_QC_REVIEW_REVIEWER_ROLE', 'Naldora QC Reviewer');
+define('NALDORA_QC_REVIEW_MANAGER_ROLE', 'Naldora QC Manager');
 
 function naldora_qc_review_islandora_bookmark_database_types() {
   return array(
