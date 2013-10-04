@@ -166,7 +166,7 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
    * @param array $form_state
    *   The array of form state.
    */
-  protected function saveAll($form_state) {
+  protected function saveAll(&$form_state) {
     $pids = $this->getAll($form_state);
     $this->save($pids, $form_state);
   }
@@ -179,7 +179,7 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
    * @param array $form_state
    *   The array of form state.
    */
-  protected function saveSelected($form_state) {
+  protected function saveSelected(&$form_state) {
     $pids = $this->getSelected($form_state);
     $this->save($pids, $form_state);
   }
@@ -192,7 +192,7 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
    * @param array $form_state
    *   The array of form state.
    */
-  protected function save($pids_to_add, $form_state) {
+  protected function save($pids_to_add, &$form_state) {
     $reviewer_el = $form_state['complete form']['naldora_qc_review']['reviewer'];
     $reviewer = drupal_array_get_nested_value($form_state['values'], $reviewer_el['#parents']);
     $reviewer_object = user_load($reviewer);
@@ -226,6 +226,7 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
 
       // Associate the reviewer with the bookmark object.
       $bookmark_object->addUser($reviewer_object->uid);
+      $form_state['redirect'] = $bookmark_object->getListURL(FALSE);
     }
   }
 }

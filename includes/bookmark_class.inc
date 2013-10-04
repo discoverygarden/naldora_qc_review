@@ -9,14 +9,24 @@ class NaldoraQCReviewList extends BookmarkDatabase {
   /**
    * Get the URL to this list.
    *
+   * @param bool $absolute
+   *   Whether or not to create an absolute URL, or just the site-local URL.
+   *
    * @return string
-   *   An absolute URL to this bookmark list, without langague prefixing.
+   *   An absolute URL to this bookmark list without langague prefixing if
+   *   $absolute is TRUE; otherwise, 'islandora-bookmark/listid/<the list id>'.
    */
-  protected function getListURL() {
-    return url("islandora-bookmark/listid/{$this->bookmarkId}", array(
-      'language' => NULL,
-      'absolute' => TRUE,
-    ));
+  public function getListURL($absolute = TRUE) {
+    $url = "islandora-bookmark/listid/{$this->bookmarkId}";
+    if ($absolute) {
+      return url($url, array(
+        'language' => NULL,
+        'absolute' => TRUE,
+      ));
+    }
+    else {
+      return $url;
+    }
   }
 
   /**
