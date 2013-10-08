@@ -137,24 +137,12 @@ class NaldoraQCSolrReviewResults extends IslandoraSolrResultsBookmark {
    *
    * Checks that a reviewer has been selected.
    */
-  protected function hasReviewerSelected($form, $form_state) {
+  protected function hasReviewerSelected($form, &$form_state) {
     $el = $form_state['complete form']['naldora_qc_review']['reviewer'];
     $key = drupal_array_get_nested_value($form_state['values'], $el['#parents']);
 
     if ($key == 'default') {
       form_set_error(implode('][', $el['#parents']), t('You must select a reviewer to whom to assign the set.'));
-    }
-  }
-
-  /**
-   * One of our '#action_validate' callbacks.
-   *
-   * Checks that some objects are selected.
-   */
-  protected function hasObjectsSelected($form, $form_state) {
-    $pids = $this->getSelected($form_state);
-    if (empty($pids)) {
-      form_set_error('islandora_bookmark_table', t('You must select at least one object.'));
     }
   }
 
