@@ -82,3 +82,37 @@ function naldora_qc_review_block_view($delta = '') {
   }
   return $block;
 }
+
+/**
+ * Implements hook_menu().
+ */
+function naldora_qc_review_menu() {
+  $items = array();
+
+  $items['naldora/qc_review'] = array(
+    'title' => 'QC Review',
+    'page callback' => 'drupal_goto',
+    'page arguments' => array(
+      'islandora/search',
+      array(
+        'query' => array(
+          'type' => 'dismax',
+          'display' => 'naldora_qc_review',
+        ),
+      ),
+    ),
+    'access callback' => 'naldora_qc_review_path_access_callback',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for 'naldora/qc_review'.
+ */
+function naldora_qc_review_path_access_callback() {
+  global $user;
+
+  return in_array(NALDORA_QC_REVIEW_MANAGER_ROLE, $user->roles);
+}

@@ -1,5 +1,6 @@
 name = Naldora QC Review
 dependencies[] = islandora_bookmark
+dependencies[] = islandora_solr
 description = QC Review Changes for USDA.
 package = Islandora
 version = 7.x-dev
